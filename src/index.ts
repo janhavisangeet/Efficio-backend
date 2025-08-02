@@ -20,6 +20,7 @@ import memberRoutes from "./routes/member.route";
 import projectRoutes from "./routes/project.route";
 import taskRoutes from "./routes/task.route";
 import { passportAuthenticateJWT } from "./config/passport.config";
+import "./cron/reminderCron";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;

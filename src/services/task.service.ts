@@ -2,7 +2,10 @@ import { TaskPriorityEnum, TaskStatusEnum } from "../enums/task.enum";
 import MemberModel from "../models/member.model";
 import ProjectModel from "../models/project.model";
 import TaskModel from "../models/task.model";
+import UserModel from "../models/user.model";
 import { BadRequestException, NotFoundException } from "../utils/appError";
+import { sendTaskAssignedEmail } from "../utils/email";
+import dayjs from "dayjs";
 
 export const createTaskService = async (
   workspaceId: string,
@@ -49,6 +52,31 @@ export const createTaskService = async (
   });
 
   await task.save();
+  // after await task.save();
+  const assignedUser = await UserModel.findById(assignedTo);
+  const projectDoc = await ProjectModel.findById(projectId).lean();
+  const sender = await UserModel.findById(userId);
+  const senderEmail = sender?.email;
+  const senderName = sender?.name;
+
+  if (
+    assignedUser?.email &&
+    assignedUser?.name &&
+    projectDoc?.name &&
+    senderEmail &&
+    senderName
+  ) {
+    await sendTaskAssignedEmail({
+      to: assignedUser.email,
+      userName: assignedUser.name,
+      taskTitle: task.title,
+      projectName: project.name,
+      dueDate,
+      templateId: 1,
+      senderEmail: sender.email,
+      senderName: sender.name,
+    });
+  }
 
   return { task };
 };
