@@ -7,7 +7,7 @@ import UserModel from "../models/user.model";
 import dayjs from "dayjs";
 
 // Run every day at 8 AM — change to "* * * * *" for every minute while testing
-cron.schedule("0 8 * * *", async () => {
+cron.schedule("* * * * *", async () => {
   console.log("[CRON] Checking tasks for due date reminders...");
 
   const tomorrow = dayjs().add(1, "day").startOf("day");
