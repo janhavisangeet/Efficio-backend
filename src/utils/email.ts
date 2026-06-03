@@ -37,7 +37,7 @@ const apiInstance = new TransactionalEmailsApi();
 
 apiInstance.setApiKey(
   Brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY!
+  process.env.BREVO_API_KEY!,
 );
 
 export const sendTaskAssignedEmail = async ({
@@ -59,9 +59,13 @@ export const sendTaskAssignedEmail = async ({
   senderEmail: string;
   senderName: string;
 }) => {
+  console.log("APP_LINK SENT TO BREVO:", process.env.FRONTEND_ORIGIN);
   await apiInstance.sendTransacEmail({
     templateId,
-    sender: { name: senderName, email: senderEmail },
+    sender: {
+      name: "Efficio",
+      email: process.env.BREVO_SENDER_EMAIL!,
+    },
     to: [{ email: to, name: userName }],
     params: {
       USER_NAME: userName,
@@ -69,7 +73,7 @@ export const sendTaskAssignedEmail = async ({
       TASK_TITLE: taskTitle,
       DUE_DATE: dueDate ?? "Not specified",
       SENDER_NAME: senderName,
-      APP_LINK: "https://localhost:5174", // 🔁 Replace with production URL later
+      APP_LINK: process.env.FRONTEND_ORIGIN, // 🔁 Replace with production URL later
     },
   });
 };

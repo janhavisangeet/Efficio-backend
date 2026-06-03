@@ -18,7 +18,7 @@ export const createTaskService = async (
     status: string;
     assignedTo?: string | null;
     dueDate?: string;
-  }
+  },
 ) => {
   const { title, description, priority, status, assignedTo, dueDate } = body;
 
@@ -26,7 +26,7 @@ export const createTaskService = async (
 
   if (!project || project.workspace.toString() !== workspaceId.toString()) {
     throw new NotFoundException(
-      "Project not found or does not belong to this workspace"
+      "Project not found or does not belong to this workspace",
     );
   }
   if (assignedTo) {
@@ -51,11 +51,40 @@ export const createTaskService = async (
     dueDate,
   });
 
+  // await task.save();
+  // // after await task.save();
+  // const assignedUser = await UserModel.findById(assignedTo);
+  // const projectDoc = await ProjectModel.findById(projectId).lean();
+  // const sender = await UserModel.findById(userId);
+  // const senderEmail = sender?.email;
+  // const senderName = sender?.name;
+
+  // if (
+  //   assignedUser?.email &&
+  //   assignedUser?.name &&
+  //   projectDoc?.name &&
+  //   senderEmail &&
+  //   senderName
+  // ) {
+  //   await sendTaskAssignedEmail({
+  //     to: assignedUser.email,
+  //     userName: assignedUser.name,
+  //     taskTitle: task.title,
+  //     projectName: project.name,
+  //     dueDate,
+  //     templateId: 1,
+  //     senderEmail: sender.email,
+  //     senderName: sender.name,
+  //   });
+  // }
+
+  // return { task };
   await task.save();
-  // after await task.save();
+
   const assignedUser = await UserModel.findById(assignedTo);
   const projectDoc = await ProjectModel.findById(projectId).lean();
   const sender = await UserModel.findById(userId);
+
   const senderEmail = sender?.email;
   const senderName = sender?.name;
 
@@ -66,16 +95,22 @@ export const createTaskService = async (
     senderEmail &&
     senderName
   ) {
-    await sendTaskAssignedEmail({
-      to: assignedUser.email,
-      userName: assignedUser.name,
-      taskTitle: task.title,
-      projectName: project.name,
-      dueDate,
-      templateId: 1,
-      senderEmail: sender.email,
-      senderName: sender.name,
-    });
+    try {
+      await sendTaskAssignedEmail({
+        to: assignedUser.email,
+        userName: assignedUser.name,
+        taskTitle: task.title,
+        projectName: project.name,
+        dueDate,
+        templateId: 1,
+        senderEmail: sender.email,
+        senderName: sender.name,
+      });
+
+      console.log("Email sent successfully");
+    } catch (error: any) {
+      console.error("BREVO ERROR:", error?.response?.body || error);
+    }
   }
 
   return { task };
@@ -92,13 +127,13 @@ export const updateTaskService = async (
     status: string;
     assignedTo?: string | null;
     dueDate?: string;
-  }
+  },
 ) => {
   const project = await ProjectModel.findById(projectId);
 
   if (!project || project.workspace.toString() !== workspaceId.toString()) {
     throw new NotFoundException(
-      "Project not found or does not belong to this workspace"
+      "Project not found or does not belong to this workspace",
     );
   }
 
@@ -106,7 +141,7 @@ export const updateTaskService = async (
 
   if (!task || task.project.toString() !== projectId.toString()) {
     throw new NotFoundException(
-      "Task not found or does not belong to this project"
+      "Task not found or does not belong to this project",
     );
   }
 
@@ -115,7 +150,7 @@ export const updateTaskService = async (
     {
       ...body,
     },
-    { new: true }
+    { new: true },
   );
 
   if (!updatedTask) {
@@ -138,7 +173,7 @@ export const getAllTasksService = async (
   pagination: {
     pageSize: number;
     pageNumber: number;
-  }
+  },
 ) => {
   const query: Record<string, any> = {
     workspace: workspaceId,
@@ -201,13 +236,13 @@ export const getAllTasksService = async (
 export const getTaskByIdService = async (
   workspaceId: string,
   projectId: string,
-  taskId: string
+  taskId: string,
 ) => {
   const project = await ProjectModel.findById(projectId);
 
   if (!project || project.workspace.toString() !== workspaceId.toString()) {
     throw new NotFoundException(
-      "Project not found or does not belong to this workspace"
+      "Project not found or does not belong to this workspace",
     );
   }
 
@@ -226,7 +261,7 @@ export const getTaskByIdService = async (
 
 export const deleteTaskService = async (
   workspaceId: string,
-  taskId: string
+  taskId: string,
 ) => {
   const task = await TaskModel.findOneAndDelete({
     _id: taskId,
@@ -235,7 +270,7 @@ export const deleteTaskService = async (
 
   if (!task) {
     throw new NotFoundException(
-      "Task not found or does not belong to the specified workspace"
+      "Task not found or does not belong to the specified workspace",
     );
   }
 
